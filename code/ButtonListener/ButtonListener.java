@@ -10,14 +10,22 @@ import java.net.URLConnection;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-public class ButtonListen {
+public class ButtonListener {
     public static final String BASE_URL = "https://safe-reaches-52945.herokuapp.com/api/rooms/";
     public static final int ROOM_NUMBER = 1;
     public static final String TEAM_A = "a";
     public static final String TEAM_B = "b";
 
-    public static void main(String args[]) throws InterruptedException {
-        System.out.println("PingPong Listener Started\nListening for button presses...");
+    public ButtonListener() {
+    	try {	
+		run();
+	} catch (InterruptedException ie) {
+		System.out.println("Inturrupted Exception occured while running the client");
+	}
+    }
+
+    private void run() throws InterruptedException {
+        System.out.println("PingPong Listener Started\nListening for button presses...\nPress CTRL+C to exit...");
         
         // create gpio controller
         final GpioController gpio = GpioFactory.getInstance();
@@ -29,24 +37,7 @@ public class ButtonListen {
         teamA.addListener(new GpioPinListenerDigital() {
             @Override
             public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
-		int state = event.getState().getValue();
-		if (state == 1) {
-			//Do nothing on press for now
-		} else {
-			String urlAddress = getUrl(true);
-			System.out.println("Button A released.\nHitting: " + urlAddress);
-			try {
-				URL url = new URL(urlAddress);
-				BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
-				for (String line; (line = reader.readLine()) != null;) {
-					System.out.println(line);
-				}
-			} catch(Exception e) {
-
-			}
-
-				
-		}
+	    	handleButtonPressEvent(event, true);
             }
             
         });
@@ -58,19 +49,9 @@ public class ButtonListen {
         teamB.addListener(new GpioPinListenerDigital() {
             @Override
             public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
-		int state = event.getState().getValue();
-		if (state == 1) {
-			//Do nothing on press for now
-		} else {
-
-			System.out.println("Button B released.\n"+getUrl(false));
-		}
-            }
-            
+	    	handleButtonPressEvent(event, false);
+            }   
         });
-
- 
-        System.out.println(" ... complete the GPIO #02 circuit and see the listener feedback here in the console.");
         
         // keep program running until user aborts (CTRL-C)
         while(true) {
@@ -82,7 +63,31 @@ public class ButtonListen {
         // gpio.shutdown();   <--- implement this method call if you wish to terminate the Pi4J GPIO controller        
     }
 
-    public static String getUrl (Boolean teamAorB) {
+    /**
+    * Handle Button presses and make a call to the heroku app api
+    * @param GpioPinDigitalStateChangeEvent event
+    * @param Boolean buttonAorB for which button is this event? true = A, false = B
+    */
+    private void handleButtonPressEvent(GpioPinDigitalStateChangeEvent event, boolean buttonAorB) {
+	String buttonName = buttonAorB == true ? "A" : "B";
+	int state = event.getState().getValue();
+	if (state == 1) {
+		//Do nothing on press for now
+	} else {
+		String urlAddress = getUrl(buttonAorB);
+		System.out.println("Button " + buttonName);
+		try {
+			URL url = new URL(urlAddress);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
+		} catch(Exception e) {
+		}
+	}
+    }
+    /**
+    * Form the api url based on which button is pressed
+    * @param Boolean buttonAorB which team should be incremented? true = A, false = B
+    */
+    private static String getUrl (Boolean teamAorB) {
 	String returnUrl =  BASE_URL + ROOM_NUMBER + "/team/";
 	if (teamAorB) {
 		returnUrl += TEAM_A;
@@ -91,4 +96,8 @@ public class ButtonListen {
 	}
 	return returnUrl + "/increment";
     }
+
+	public static void main (String args[]) {
+		ButtonListener buttonListener = new ButtonListener();
+	}
 }
