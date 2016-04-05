@@ -1,7 +1,7 @@
-run:
-	sudo java -classpath .:classes:/opt/pi4j/lib/'*' ButtonListener
+run: ./ButtonListener.class
+	sudo java -classpath .:classes:/opt/pi4j/lib/'*' ButtonListener 1
 
-compile:
+compile: ./ButtonListener.java
 	javac -classpath .:classes:/opt/pi4j/lib/'*' ButtonListener.java
 
 clean:

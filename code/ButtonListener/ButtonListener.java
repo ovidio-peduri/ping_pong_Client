@@ -12,12 +12,13 @@ import java.io.InputStreamReader;
 
 public class ButtonListener {
     public static final String BASE_URL = "https://safe-reaches-52945.herokuapp.com/api/rooms/";
-    public static final int ROOM_NUMBER = 1;
     public static final String TEAM_A = "a";
     public static final String TEAM_B = "b";
+    public int roomNumber;
 
-    public ButtonListener() {
-    	try {	
+    public ButtonListener(int roomNumber) {
+    	this.roomNumber = roomNumber;
+	try {	
 		run();
 	} catch (InterruptedException ie) {
 		System.out.println("Inturrupted Exception occured while running the client");
@@ -25,7 +26,7 @@ public class ButtonListener {
     }
 
     private void run() throws InterruptedException {
-        System.out.println("PingPong Listener Started\nListening for button presses...\nPress CTRL+C to exit...");
+        System.out.println("PingPong Listener Started for room " + this.roomNumber + "\nListening for button presses...\nPress CTRL+C to exit...");
         
         // create gpio controller
         final GpioController gpio = GpioFactory.getInstance();
@@ -87,8 +88,8 @@ public class ButtonListener {
     * Form the api url based on which button is pressed
     * @param Boolean buttonAorB which team should be incremented? true = A, false = B
     */
-    private static String getUrl (Boolean teamAorB) {
-	String returnUrl =  BASE_URL + ROOM_NUMBER + "/team/";
+    private String getUrl (Boolean teamAorB) {
+	String returnUrl =  BASE_URL + this.roomNumber + "/team/";
 	if (teamAorB) {
 		returnUrl += TEAM_A;
 	} else {
@@ -98,6 +99,16 @@ public class ButtonListener {
     }
 
 	public static void main (String args[]) {
-		ButtonListener buttonListener = new ButtonListener();
+		int roomNumber = 1;
+		if (args.length > 0) {
+			try 
+			{
+				roomNumber = Integer.parseInt(args[0]);
+			} catch (Exception e) {
+				System.out.println("Invalid room number... Exiting...");
+				System.exit(1);
+			}
+		}
+		ButtonListener buttonListener = new ButtonListener(roomNumber);
 	}
 }
