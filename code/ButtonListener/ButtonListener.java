@@ -1,20 +1,23 @@
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalInput;
+import com.pi4j.io.gpio.GpioPinDigitalOutput;
 import com.pi4j.io.gpio.PinPullResistance;
+import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.RaspiPin;
 import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
 import com.pi4j.io.gpio.event.GpioPinListenerDigital;
+import com.pi4j.io.gpio.trigger.GpioPulseStateTrigger;
 import java.net.URL;
 import java.net.URLConnection;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 public class ButtonListener {
-    public static final String BASE_URL = "https://safe-reaches-52945.herokuapp.com/api/rooms/";
-    public static final String TEAM_A = "a";
-    public static final String TEAM_B = "b";
-    public int roomNumber;
+    private static final String BASE_URL = "https://pardot-pingpong.herokuapp.com/api/rooms/";
+    private static final String TEAM_A = "a";
+    private static final String TEAM_B = "b";
+    private int roomNumber;
 
     public ButtonListener(int roomNumber) {
     	this.roomNumber = roomNumber;
@@ -46,6 +49,7 @@ public class ButtonListener {
 	// provision gpio pin #03 as an input pin with its internal pull down resistor enabled
         final GpioPinDigitalInput teamB = gpio.provisionDigitalInputPin(RaspiPin.GPIO_03, PinPullResistance.PULL_DOWN);
 
+
         // create and register gpio pin listener
         teamB.addListener(new GpioPinListenerDigital() {
             @Override
@@ -54,14 +58,15 @@ public class ButtonListener {
             }   
         });
         
-        // keep program running until user aborts (CTRL-C)
+	//Set up the trigger pin so that the camera is signaled when to start/stop recording
+	//GpioPinDigitalOutput triggerPin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_04, "Trigger", PinState.LOW);
+	//Pulse the triggerPin for 50ms
+       	//teamA.addTrigger(new GpioPulseStateTrigger(PinState.HIGH, triggerPin, 50));
+	
+	// keep program running until user aborts (CTRL-C)
         while(true) {
             Thread.sleep(500);
         }
-        
-        // stop all GPIO activity/threads by shutting down the GPIO controller
-        // (this method will forcefully shutdown all GPIO monitoring threads and scheduled tasks)
-        // gpio.shutdown();   <--- implement this method call if you wish to terminate the Pi4J GPIO controller        
     }
 
     /**
@@ -79,6 +84,7 @@ public class ButtonListener {
 		System.out.println("Button " + buttonName);
 		try {
 			URL url = new URL(urlAddress);
+			System.out.println(url);
 			BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
 		} catch(Exception e) {
 		}
