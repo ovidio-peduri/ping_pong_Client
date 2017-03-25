@@ -30,6 +30,9 @@ ClickButton multifunctionButtons [NUM_MULTIFUNCTION_BUTTONS] = {
 
 //SETUP
 void setup() {
+  //Use the external antenna
+  WiFi.selectAntenna(ANT_EXTERNAL);
+
   pinMode(led, OUTPUT);
   //Setup all the buttons for input
   pinMode(A_Score, INPUT_PULLDOWN);
@@ -85,6 +88,12 @@ void handleScoreButtons()
       //Only 1 team should increment at a time
       //Ignore all other score button presses
       return;
+    } else if (scoreButtons[i].clicks == SINGLE_LONG_CLICK) {
+      if (i > 0) {
+        Particle.publish("B_DECREMENT");
+      } else {
+        Particle.publish("A_DECREMENT");
+      }
     }
   }
 }
@@ -94,12 +103,11 @@ void handleMultifunctionButtons()
   //For now these buttons just turn an led on or off for testing
   for (int i = 0; i< NUM_MULTIFUNCTION_BUTTONS; i++) {
     if (multifunctionButtons[i].clicks == SINGLE_CLICK) {
-      digitalWrite(led, HIGH);
-      return;
-    }
-    else if (multifunctionButtons[i].clicks == DOUBLE_CLICK) {
-      digitalWrite(led, LOW);
-      return;
+      if (i > 0) {
+        Particle.publish("B_TAUNT");
+      } else {
+        Particle.publish("A_TAUNT");
+      }
     }
   }
 }
