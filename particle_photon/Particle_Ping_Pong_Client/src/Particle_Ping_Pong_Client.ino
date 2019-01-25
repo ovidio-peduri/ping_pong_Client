@@ -108,18 +108,6 @@ void handleMultifunctionButtons()
       } else {
         Particle.publish("A_TAUNT");
       }
-    } else if (multifunctionButtons[i].clicks = SINGLE_LONG_CLICK) {
-      if (i > 0) {
-        Particle.publish("B_LONG_TAUNT");
-      } else {
-        Particle.publish("A_LONG_TAUNT");
-      }
-    } else if (multifunctionButtons[i].clicks = TRIPLE_CLICK) {
-      if (i > 0) {
-        Particle.publish("B_TRIPLE_TAUNT");
-      } else {
-        Particle.publish("A_TRIPLE_TAUNT");
-      }
     }
   }
 }
