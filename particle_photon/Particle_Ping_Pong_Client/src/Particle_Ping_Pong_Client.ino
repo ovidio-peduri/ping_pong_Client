@@ -79,8 +79,9 @@ void updateMultifunctionButtons() {
   }
 }
 
-void handlePublishhing(char* eventName)
+void handlePublishing(char* eventName)
 {
+  // This is lame, but the compiler version that's used doesn't support to_string
   char integerValue [50];
   char publishBuffer [100] = "{\"request_id\": \"";
   sprintf(integerValue, "%d", request_id);
@@ -100,18 +101,18 @@ void handleScoreButtons()
       //Publish event where it will be handled by
       //a particle webhook
       if (i > 0) {
-        Particle.publish("B_INCREMENT");
+        handlePublishing("B_INCREMENT");
       } else {
-        Particle.publish("A_INCREMENT");
+        handlePublishing("A_INCREMENT");
       }
       //Only 1 team should increment at a time
       //Ignore all other score button presses
       return;
     } else if (scoreButtons[i].clicks == SINGLE_LONG_CLICK) {
       if (i > 0) {
-        handlePublishhing("B_DECREMENT");
+        handlePublishing("B_DECREMENT");
       } else {
-        handlePublishhing("A_DECREMENT");
+        handlePublishing("A_DECREMENT");
       }
     }
   }
@@ -123,9 +124,9 @@ void handleMultifunctionButtons()
   for (int i = 0; i< NUM_MULTIFUNCTION_BUTTONS; i++) {
     if (multifunctionButtons[i].clicks == SINGLE_CLICK) {
       if (i > 0) {
-        handlePublishhing("B_TAUNT");
+        handlePublishing("B_TAUNT");
       } else {
-        handlePublishhing("A_TAUNT");
+        handlePublishing("A_TAUNT");
       }
     }
   }
