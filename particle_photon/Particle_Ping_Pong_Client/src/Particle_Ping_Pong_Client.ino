@@ -1,4 +1,5 @@
 #include "clickButton.h"
+#include "stdlib.h"
 
 const static int SINGLE_CLICK = 1;
 const static int DOUBLE_CLICK = 2;
@@ -11,11 +12,15 @@ const static int NO_CLICK = 0;
 const static int NUM_SCORE_BUTTONS = 2;
 const static int NUM_MULTIFUNCTION_BUTTONS = 2;
 
+using namespace std;
+
 int A_Score = D0;
 int B_Score = D1;
 
 int A_Multifunction_Btn = D2;
 int B_Multifunction_Btn = D3;
+
+int request_id = 0;
 
 int led = D7;
 ClickButton scoreButtons [NUM_SCORE_BUTTONS] = {
@@ -74,6 +79,20 @@ void updateMultifunctionButtons() {
   }
 }
 
+void handlePublishhing(char* eventName)
+{
+  char integerValue [50];
+  char publishBuffer [100] = "{\"request_id\": \"";
+  sprintf(integerValue, "%d", request_id);
+  strcat(publishBuffer, integerValue);
+  strcat(publishBuffer, "\"}");
+
+  char* publishData = publishBuffer;
+
+  Particle.publish(eventName, publishData);
+  request_id++;
+}
+
 void handleScoreButtons()
 {
   for (int i = 0; i< NUM_SCORE_BUTTONS; i++) {
@@ -90,9 +109,9 @@ void handleScoreButtons()
       return;
     } else if (scoreButtons[i].clicks == SINGLE_LONG_CLICK) {
       if (i > 0) {
-        Particle.publish("B_DECREMENT");
+        handlePublishhing("B_DECREMENT");
       } else {
-        Particle.publish("A_DECREMENT");
+        handlePublishhing("A_DECREMENT");
       }
     }
   }
@@ -104,9 +123,9 @@ void handleMultifunctionButtons()
   for (int i = 0; i< NUM_MULTIFUNCTION_BUTTONS; i++) {
     if (multifunctionButtons[i].clicks == SINGLE_CLICK) {
       if (i > 0) {
-        Particle.publish("B_TAUNT");
+        handlePublishhing("B_TAUNT");
       } else {
-        Particle.publish("A_TAUNT");
+        handlePublishhing("A_TAUNT");
       }
     }
   }
